@@ -1,0 +1,47 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.project }}
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # One entry per project key in src/config/environments.js.
+        project: [loyaltri]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run UI tests for ${{ matrix.project }}
+        run: npx playwright test --project=${{ matrix.project }}-ui
+        env:
+          LOYALTRI_URL: ${{ secrets.LOYALTRI_URL }}
+          LOYALTRI_USER: ${{ secrets.LOYALTRI_USER }}
+          LOYALTRI_PASS: ${{ secrets.LOYALTRI_PASS }}
+
+      - name: Upload report for ${{ matrix.project }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.project }}
+          path: reports/
+          retention-days: 14

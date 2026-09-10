@@ -1,0 +1,17 @@
+node_modules/
+reports/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Saved login sessions from auth.setup.js — these are live credentials.
+.auth/
+
+# Per-instance credentials (.env.alpha / .env.staging / .env.prod).
+# The trailing exception keeps the committed template visible.
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store

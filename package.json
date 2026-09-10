@@ -1,0 +1,37 @@
+{
+  "name": "qa-automation",
+  "version": "1.0.0",
+  "description": "Orchestrated Playwright automation framework covering multiple external products",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:alpha": "cross-env TEST_ENV=alpha playwright test",
+    "test:staging": "cross-env TEST_ENV=staging playwright test",
+    "test:prod": "cross-env TEST_ENV=prod playwright test",
+    "test:prod:unsafe": "cross-env TEST_ENV=prod ALLOW_PROD=true playwright test",
+    "test:loyaltri": "playwright test --project=loyaltri-ui",
+    "test:loyaltri:ui": "playwright test --project=loyaltri-ui",
+    "testlink": "node scripts/run-assigned.js",
+    "testlink:dry": "node scripts/run-assigned.js --dry-run",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:functional": "playwright test --grep @functional",
+    "test:regression": "playwright test --grep @regression",
+    "test:onboarding": "playwright test --grep @onboarding",
+    "list": "playwright test --list",
+    "report": "playwright show-report reports/alpha/html-report",
+    "report:alpha": "playwright show-report reports/alpha/html-report",
+    "report:staging": "playwright show-report reports/staging/html-report",
+    "report:prod": "playwright show-report reports/prod/html-report",
+    "codegen": "playwright codegen",
+    "install:browsers": "playwright install --with-deps"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.5"
+  }
+}

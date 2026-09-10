@@ -1,0 +1,832 @@
+<title>Loyaltri Automation Runbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper:      #F4F6F8;
+    --surface:    #FFFFFF;
+    --surface-2:  #EAEEF3;
+    --ink:        #131820;
+    --ink-2:      #39434F;
+    --muted:      #69737F;
+    --rule:       #DCE2E9;
+    --rule-soft:  #E9EDF2;
+    --accent:     #4B3F8F;
+    --accent-ink: #3A3070;
+    --accent-soft:#EDEAF8;
+    --pass:       #0F6B46;
+    --pass-soft:  #E3F2EA;
+    --fail:       #A82418;
+    --fail-soft:  #FBE8E5;
+    --block:      #7A5700;
+    --block-soft: #FBF0D9;
+    --term-bg:    #12161D;
+    --term-fg:    #D5DCE6;
+    --term-dim:   #7B8695;
+    --term-rule:  #262E3A;
+    --shadow:     0 1px 2px rgba(19,24,32,.05), 0 8px 24px -12px rgba(19,24,32,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0E1116;
+      --surface:    #161B22;
+      --surface-2:  #1E242D;
+      --ink:        #E9ECF2;
+      --ink-2:      #C4CBD6;
+      --muted:      #929CAA;
+      --rule:       #29313C;
+      --rule-soft:  #212832;
+      --accent:     #AEA1EE;
+      --accent-ink: #C6BCF5;
+      --accent-soft:#231E3B;
+      --pass:       #4FC48C;
+      --pass-soft:  #10281E;
+      --fail:       #F58375;
+      --fail-soft:  #2B1614;
+      --block:      #DCB255;
+      --block-soft: #2A2210;
+      --term-bg:    #090C11;
+      --term-fg:    #D5DCE6;
+      --term-dim:   #6C7686;
+      --term-rule:  #1D242E;
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #0E1116;
+    --surface:    #161B22;
+    --surface-2:  #1E242D;
+    --ink:        #E9ECF2;
+    --ink-2:      #C4CBD6;
+    --muted:      #929CAA;
+    --rule:       #29313C;
+    --rule-soft:  #212832;
+    --accent:     #AEA1EE;
+    --accent-ink: #C6BCF5;
+    --accent-soft:#231E3B;
+    --pass:       #4FC48C;
+    --pass-soft:  #10281E;
+    --fail:       #F58375;
+    --fail-soft:  #2B1614;
+    --block:      #DCB255;
+    --block-soft: #2A2210;
+    --term-bg:    #090C11;
+    --term-fg:    #D5DCE6;
+    --term-dim:   #6C7686;
+    --term-rule:  #1D242E;
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Source Sans 3", ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+    font-size: 16.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  @media (min-width: 1080px) {
+    .wrap { grid-template-columns: 208px minmax(0, 1fr); align-items: start; }
+  }
+
+  /* ---------- masthead ---------- */
+  header.masthead {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid var(--rule);
+    padding: 52px 0 30px;
+    margin-bottom: 4px;
+  }
+  .eyebrow {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  h1 {
+    font-family: "Archivo", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.1rem, 4.6vw, 3.05rem);
+    letter-spacing: -.024em;
+    line-height: 1.05;
+    text-wrap: balance;
+    margin: 0 0 16px;
+  }
+  .standfirst {
+    font-size: 1.11rem;
+    color: var(--ink-2);
+    max-width: 64ch;
+    margin: 0;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    margin-top: 26px;
+  }
+  .fact {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    color: var(--ink-2);
+    padding: 5px 10px;
+    border-radius: 4px;
+  }
+  .fact b { color: var(--ink); font-weight: 500; }
+
+  /* ---------- side rail ---------- */
+  nav.rail { display: none; }
+  @media (min-width: 1080px) {
+    nav.rail {
+      display: block;
+      position: sticky;
+      top: 28px;
+      padding-top: 8px;
+    }
+  }
+  .rail h2 {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 12px;
+    font-weight: 500;
+  }
+  .rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .rail a {
+    display: block;
+    padding: 6px 10px 6px 12px;
+    border-left: 2px solid var(--rule);
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .rail a:hover { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); }
+  .rail a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  /* ---------- article ---------- */
+  main { min-width: 0; }
+  section { margin-top: 56px; scroll-margin-top: 20px; }
+  section:first-of-type { margin-top: 40px; }
+
+  .part-label {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  h2.part {
+    font-family: "Archivo", ui-sans-serif, sans-serif;
+    font-weight: 600;
+    font-size: 1.72rem;
+    letter-spacing: -.018em;
+    line-height: 1.16;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: "Archivo", ui-sans-serif, sans-serif;
+    font-weight: 600;
+    font-size: 1.09rem;
+    letter-spacing: -.008em;
+    margin: 34px 0 8px;
+  }
+  p { margin: 0 0 14px; max-width: 68ch; }
+  .lede { color: var(--ink-2); max-width: 68ch; }
+  ul, ol.plain { max-width: 68ch; padding-left: 20px; margin: 0 0 14px; }
+  li { margin-bottom: 6px; }
+  strong { font-weight: 600; }
+  a { color: var(--accent); }
+
+  code {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: .87em;
+    background: var(--surface-2);
+    border: 1px solid var(--rule-soft);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--ink);
+    word-break: break-word;
+  }
+
+  /* ---------- terminal ---------- */
+  .term {
+    background: var(--term-bg);
+    border: 1px solid var(--term-rule);
+    border-radius: 7px;
+    margin: 18px 0 20px;
+    overflow: hidden;
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--term-rule);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--term-dim);
+    letter-spacing: .05em;
+  }
+  .term pre {
+    margin: 0;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12.9px;
+    line-height: 1.66;
+    color: var(--term-fg);
+    tab-size: 2;
+  }
+  .term .c { color: var(--term-dim); }
+  .term .g { color: #61C495; }
+  .term .r { color: #F08076; }
+  .term .y { color: #DFB65C; }
+  .term .v { color: #B6A8F2; }
+
+  /* ---------- tables ---------- */
+  .tw { overflow-x: auto; margin: 18px 0 22px; border: 1px solid var(--rule); border-radius: 7px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  thead th {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.mono, th.mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12.6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ---------- steps ---------- */
+  ol.steps { list-style: none; margin: 26px 0 0; padding: 0; counter-reset: s; }
+  ol.steps > li {
+    counter-increment: s;
+    position: relative;
+    padding: 0 0 30px 52px;
+    border-left: 1px solid var(--rule);
+    margin-left: 15px;
+  }
+  ol.steps > li:last-child { border-left-color: transparent; padding-bottom: 4px; }
+  ol.steps > li::before {
+    content: counter(s, decimal-leading-zero);
+    position: absolute;
+    left: -15px;
+    top: -2px;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+  :root[data-theme="dark"] ol.steps > li::before { color: #1A1630; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) ol.steps > li::before { color: #1A1630; }
+  }
+  ol.steps h3 { margin: 0 0 6px; font-size: 1.06rem; }
+  ol.steps .where {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  /* ---------- callout ---------- */
+  .note {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 13px 16px;
+    margin: 20px 0;
+    border-radius: 0 5px 5px 0;
+    max-width: 68ch;
+  }
+  .note.warn { border-left-color: var(--block); background: var(--block-soft); }
+  .note.stop { border-left-color: var(--fail); background: var(--fail-soft); }
+  .note p { margin: 0; }
+  .note p + p { margin-top: 9px; }
+  .note-t {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 5px;
+    color: var(--accent-ink);
+  }
+  .note.warn .note-t { color: var(--block); }
+  .note.stop .note-t { color: var(--fail); }
+
+  /* ---------- pills ---------- */
+  .pill {
+    display: inline-block;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .06em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .pill.ok { background: var(--pass-soft); color: var(--pass); }
+  .pill.no { background: var(--fail-soft); color: var(--fail); }
+  .pill.wait { background: var(--block-soft); color: var(--block); }
+
+  /* ---------- flow ---------- */
+  .flow {
+    display: grid;
+    gap: 10px;
+    margin: 22px 0 24px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) { .flow { grid-template-columns: repeat(3, 1fr); } }
+  .node {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    padding: 13px 15px;
+    position: relative;
+  }
+  .node .n {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .node .b { font-family: "Archivo", sans-serif; font-weight: 600; font-size: .97rem; display: block; margin-bottom: 3px; }
+  .node .d { font-size: 13.5px; color: var(--ink-2); }
+  .node.is-blocked { border-style: dashed; border-color: var(--block); }
+
+  /* ---------- file tree ---------- */
+  .tree {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    padding: 16px 18px;
+    margin: 18px 0 22px;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12.8px;
+    line-height: 1.85;
+  }
+  .tree .p { color: var(--ink); }
+  .tree .cm { color: var(--muted); }
+  .tree .hl { color: var(--accent); }
+
+  footer {
+    grid-column: 1 / -1;
+    margin-top: 64px;
+    padding-top: 22px;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Playwright · TestLink · Loyaltri</p>
+    <h1>Loyaltri Automation Runbook</h1>
+    <p class="standfirst">How a test case travels from TestLink, into the framework, onto an environment, and back again as a result. Written so anyone on the QA team can add a case and run one without asking first.</p>
+    <div class="facts">
+      <span class="fact"><b>15</b> login cases automated</span>
+      <span class="fact"><b>4</b> environments</span>
+      <span class="fact"><b>LOYTRI-37…51</b> mapped</span>
+      <span class="fact">Playwright <b>1.48</b></span>
+      <span class="fact">TestLink <b>1.9.20</b></span>
+    </div>
+  </header>
+
+  <nav class="rail">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#map">The map</a></li>
+      <li><a href="#add">Adding a test case</a></li>
+      <li><a href="#testlink">TestLink integration</a></li>
+      <li><a href="#run">Running tests</a></li>
+      <li><a href="#quirks">Loyaltri quirks</a></li>
+      <li><a href="#reference">Reference tables</a></li>
+      <li><a href="#blocked">What's blocked</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ============ MAP ============ -->
+    <section id="map">
+      <p class="part-label">Part one</p>
+      <h2 class="part">The map</h2>
+      <p class="lede">The framework separates <strong>things every product shares</strong> from <strong>things one product needs</strong>. That split is the whole architecture — get it right and adding a second product costs one config entry.</p>
+
+      <div class="tree">
+        <div><span class="cm">├─</span> <span class="p">playwright.config.js</span>      <span class="cm">generates projects, picks the instance</span></div>
+        <div><span class="cm">├─</span> <span class="p">.env.test / .qa / .uat / .prod</span>  <span class="cm">one per environment, same variable names</span></div>
+        <div><span class="cm">│</span></div>
+        <div><span class="cm">├─</span> <span class="hl">src/config/</span></div>
+        <div><span class="cm">│  └─</span> environments.js       <span class="cm">which instance, which URL, which credentials</span></div>
+        <div><span class="cm">│</span></div>
+        <div><span class="cm">├─</span> <span class="hl">src/core/</span>                 <span class="cm">shared by every product — edit rarely</span></div>
+        <div><span class="cm">│  ├─</span> base-page.js          <span class="cm">click / fill / waitForVisible helpers</span></div>
+        <div><span class="cm">│  ├─</span> fixtures/             <span class="cm">env injection, production guard</span></div>
+        <div><span class="cm">│  ├─</span> testlink/results.js   <span class="cm">Playwright results → TestLink payload</span></div>
+        <div><span class="cm">│  └─</span> utils/test-data.js    <span class="cm">unique emails, dates, names</span></div>
+        <div><span class="cm">│</span></div>
+        <div><span class="cm">└─</span> <span class="hl">src/projects/loyaltri/</span>    <span class="cm">everything Loyaltri-specific</span></div>
+        <div>   <span class="cm">├─</span> auth.setup.js         <span class="cm">logs in once per run</span></div>
+        <div>   <span class="cm">├─</span> pages/                <span class="cm">Page Objects — where locators live</span></div>
+        <div>   <span class="cm">├─</span> data/                 <span class="cm">non-secret fixtures and expected messages</span></div>
+        <div>   <span class="cm">└─</span> tests/ui/ · tests/api/  <span class="cm">the specs themselves</span></div>
+      </div>
+
+      <h3>The one rule</h3>
+      <p><strong>Locators live in <code>pages/</code>. Assertions live in <code>tests/</code>.</strong> A spec should read like a test plan — <em>go here, do this, expect that</em> — with no CSS selectors in sight. When the UI changes you fix one Page Object, not fifteen specs.</p>
+    </section>
+
+    <!-- ============ ADD ============ -->
+    <section id="add">
+      <p class="part-label">Part two</p>
+      <h2 class="part">Adding a test case</h2>
+      <p class="lede">This is a real sequence — each step depends on the one before it. Follow it in order and a new case takes about twenty minutes.</p>
+
+      <ol class="steps">
+        <li>
+          <h3>Write the case in TestLink first</h3>
+          <span class="where">TestLink → your suite → Create test case</span>
+          <p>Write it as a manual case with proper steps and expected results, then note the <strong>external ID</strong> it gets — <code>LOYTRI-52</code>, <code>LOYTRI-53</code> and so on. TestLink assigns this; you never invent it.</p>
+          <p>Writing the case first forces you to decide what "correct" actually means <em>before</em> you write code that asserts it. Automating first tends to produce a test that just describes whatever the app currently does.</p>
+        </li>
+
+        <li>
+          <h3>Record the flow</h3>
+          <span class="where">npm run codegen -- https://alpha.loyaltri.com</span>
+          <p>Click through the flow in the recorder. The output is throwaway — it exists to capture <em>real locators and real button labels</em>, not to become the test.</p>
+          <div class="term">
+            <div class="term-bar">PowerShell</div>
+            <pre>npm run codegen -- https://alpha.loyaltri.com</pre>
+          </div>
+        </li>
+
+        <li>
+          <h3>Turn the recording into a Page Object</h3>
+          <span class="where">src/projects/loyaltri/pages/</span>
+          <p>Codegen produces brittle selectors. Rewrite them as roles and labels, and give each scenario a named method.</p>
+          <div class="term">
+            <div class="term-bar">before — codegen output</div>
+            <pre><span class="r">page.locator('a').filter({ hasText: 'AAdmin Loyaltriadmin@loyaltri' })</span>
+<span class="c">// hardcodes one user's name — breaks for everyone else</span></pre>
+          </div>
+          <div class="term">
+            <div class="term-bar">after — LoginPage.js</div>
+            <pre><span class="g">this.accountMenu = page.locator('a')
+  .filter({ hasText: /[\w.+-]+@[\w-]+\.[\w.]+/ }).first();</span>
+<span class="c">// matches any signed-in user by email pattern</span></pre>
+          </div>
+          <p>Name methods after the scenario, not the mechanics: <code>loginWithRememberMe()</code>, <code>cancelLogout()</code>, <code>requestPasswordReset()</code>.</p>
+        </li>
+
+        <li>
+          <h3>Write the spec and tag it</h3>
+          <span class="where">src/projects/loyaltri/tests/ui/smoke/</span>
+          <p>The title mirrors the TestLink case name, and carries the external ID as a tag. <strong>That tag is the entire integration.</strong></p>
+          <div class="term">
+            <div class="term-bar">login.spec.js</div>
+            <pre>test(<span class="y">'TC01 — Successful login with valid credentials <span class="v">@LOYTRI-37</span>'</span>, async ({ page, env }) => {
+  const login = new LoginPage(page);
+
+  await login.goto();
+  await login.login(env.username, env.password);
+
+  await expect(login.accountMenu).toBeVisible();
+});</pre>
+          </div>
+          <p>Import <code>test</code> and <code>expect</code> from <code>core/fixtures/test-fixtures</code>, never from <code>@playwright/test</code> directly — that is what injects <code>env</code> and applies the production guard.</p>
+          <div class="note warn">
+            <span class="note-t">Tag rules</span>
+            <p>A case tag is <code>@LOYTRI-52</code> — uppercase letters, dash, digits. Ordinary tags like <code>@smoke</code> and <code>@no-prod</code> are deliberately ignored by the matcher, so they can never be mistaken for a case ID.</p>
+            <p>Any test that <strong>creates or changes records</strong> must also carry <code>@no-prod</code>.</p>
+          </div>
+        </li>
+
+        <li>
+          <h3>Prove it runs</h3>
+          <span class="where">npm run test:test</span>
+          <p>Run just your new case by its tag, watch it in a real browser, then run the whole file to check you haven't broken a neighbour.</p>
+          <div class="term">
+            <div class="term-bar">PowerShell</div>
+            <pre><span class="c"># just the new case, visible browser</span>
+npm run test:test -- --grep <span class="y">"@LOYTRI-52"</span> --headed
+
+<span class="c"># the whole login file</span>
+npm run test:test -- login.spec.js</pre>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ============ TESTLINK ============ -->
+    <section id="testlink">
+      <p class="part-label">Part three</p>
+      <h2 class="part">How TestLink is integrated</h2>
+      <p class="lede">One tag in the test title does two jobs: it selects what runs, and it addresses where the result goes. There is no mapping file to maintain, because a mapping file drifts and a tag in the title cannot.</p>
+
+      <div class="flow">
+        <div class="node">
+          <span class="n">Step 1 · TestLink</span>
+          <span class="b">Assign</span>
+          <span class="d">A tester is assigned cases inside a Test Plan and Build. That assignment is the input.</span>
+        </div>
+        <div class="node">
+          <span class="n">Step 2 · Framework</span>
+          <span class="b">Select</span>
+          <span class="d">Assigned IDs become a grep: <code>@LOYTRI-37\b|@LOYTRI-40\b</code> — only those tests run.</span>
+        </div>
+        <div class="node">
+          <span class="n">Step 3 · Playwright</span>
+          <span class="b">Execute</span>
+          <span class="d">Runs against the chosen instance and writes <code>reports/&lt;env&gt;/results.json</code>.</span>
+        </div>
+        <div class="node">
+          <span class="n">Step 4 · Framework</span>
+          <span class="b">Read</span>
+          <span class="d">Results are flattened to one record per case: status, duration, error, screenshot.</span>
+        </div>
+        <div class="node is-blocked">
+          <span class="n">Step 5 · TestLink API</span>
+          <span class="b">Publish</span>
+          <span class="d">Each record posts to the case's execution record with notes attached.</span>
+        </div>
+        <div class="node is-blocked">
+          <span class="n">Step 6 · TestLink</span>
+          <span class="b">Report</span>
+          <span class="d">The Build shows pass / fail / blocked per case, per tester.</span>
+        </div>
+      </div>
+      <p style="font-size:13.5px;color:var(--muted);margin-top:-6px;">Dashed borders mark the two steps that are written but not yet connected — see <a href="#blocked">what's blocked</a>.</p>
+
+      <h3>Status mapping</h3>
+      <p>Playwright outcomes translate to TestLink execution codes. The important one is the third row.</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Playwright</th><th class="mono">Code</th><th>TestLink</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill ok">passed</span></td><td class="mono">p</td><td>Passed</td><td>Assertions held.</td></tr>
+            <tr><td><span class="pill no">failed / timedOut</span></td><td class="mono">f</td><td>Failed</td><td>Error message and failure screenshot go into the notes.</td></tr>
+            <tr><td><span class="pill wait">skipped</span></td><td class="mono">b</td><td>Blocked</td><td>It never ran — which is <em>not</em> the same as passing. Reporting a skip as a pass would be a lie in the audit trail.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <span class="note-t">Retries</span>
+        <p>Only the <strong>final attempt</strong> is reported. A test that fails then passes on retry is a pass; the retry count is kept so the notes can flag it as flaky.</p>
+      </div>
+
+      <h3>Test Plans and Builds — the part people miss</h3>
+      <p>A test case is a <em>template</em>. You never execute it directly. You execute it inside a <strong>Build</strong>, which lives inside a <strong>Test Plan</strong> — and that is the only place an assignment can exist.</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Level</th><th>What it is</th><th>How often you make one</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">Test Project</td><td>Loyaltri</td><td>Once, ever</td></tr>
+            <tr><td class="mono">Test Suite</td><td>Login Test, Employee Onboarding — where cases are written</td><td>Per feature area</td></tr>
+            <tr><td class="mono">Test Plan</td><td>A chosen subset of cases for one round of testing</td><td>Per cycle or release</td></tr>
+            <tr><td class="mono">Build</td><td>What you actually execute against; results attach here</td><td>Per deployment</td></tr>
+            <tr><td class="mono">Assignment</td><td>Case → tester, inside a Build</td><td>Per cycle</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>To set one up: <em>Test Plan Management → Create</em>, then <em>Add / Remove Test Cases</em>, then <em>Builds/Releases → Create</em>, then <em>Assign Test Case Execution</em>. Each tester generates their own key under <em>My Settings → Generate a new API key</em>, so TestLink records who really ran what.</p>
+    </section>
+
+    <!-- ============ RUN ============ -->
+    <section id="run">
+      <p class="part-label">Part four</p>
+      <h2 class="part">Running tests</h2>
+      <p class="lede">Every run answers two questions: <strong>which environment</strong>, and <strong>which tests</strong>. The environment is the npm script. The tests are the flags after <code>--</code>.</p>
+
+      <h3>Choosing the environment</h3>
+      <p>All four <code>.env</code> files use identical variable names, so nothing in the code knows which instance it is hitting. Only the values change.</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th class="mono">Command</th><th>Reads</th><th>Targets</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">npm run test:test</td><td class="mono">.env.test</td><td>alpha.loyaltri.com</td></tr>
+            <tr><td class="mono">npm run test:qa</td><td class="mono">.env.qa</td><td>QA instance</td></tr>
+            <tr><td class="mono">npm run test:uat</td><td class="mono">.env.uat</td><td>UAT instance</td></tr>
+            <tr><td class="mono">npm run test:prod</td><td class="mono">.env.prod</td><td>Production — read-only tests only</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Every run prints its target before doing anything, because the most expensive mistake here is not knowing which server you just tested:</p>
+      <div class="term">
+        <div class="term-bar">npm run test:uat</div>
+        <pre>  Playwright target instance: <span class="v">UAT</span>  (.env.uat)
+
+Running 15 tests using 2 workers
+  <span class="g">✓</span> TC01 — Successful login with valid credentials <span class="c">@LOYTRI-37</span>   12.7s
+  <span class="g">✓</span> TC02 — Successful login with Remember Me ticked <span class="c">@LOYTRI-38</span>   8.6s
+  …
+  <span class="g">15 passed</span> (2.2m)</pre>
+      </div>
+
+      <h3>Choosing what runs</h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th class="mono">Add after <code>--</code></th><th>Runs</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">--grep "@LOYTRI-37"</td><td>One specific TestLink case</td></tr>
+            <tr><td class="mono">--grep "@smoke"</td><td>The smoke set</td></tr>
+            <tr><td class="mono">--grep "@regression"</td><td>The regression set</td></tr>
+            <tr><td class="mono">--project=loyaltri-ui</td><td>Browser tests only</td></tr>
+            <tr><td class="mono">--project=loyaltri-api</td><td>API tests only, no browser</td></tr>
+            <tr><td class="mono">login.spec.js</td><td>One file</td></tr>
+            <tr><td class="mono">--headed</td><td>Watch it in a real browser</td></tr>
+            <tr><td class="mono">--debug</td><td>Step through it line by line</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="term">
+        <div class="term-bar">combining them</div>
+        <pre><span class="c"># the smoke set on UAT, in a visible browser</span>
+npm run test:uat -- --grep <span class="y">"@smoke"</span> --project=loyaltri-ui --headed
+
+<span class="c"># three assigned cases on QA</span>
+npm run test:qa -- --grep <span class="y">"@LOYTRI-37\b|@LOYTRI-40\b|@LOYTRI-46\b"</span></pre>
+      </div>
+
+      <h3>Reading the report</h3>
+      <p>Reports are kept per environment, so a UAT run never overwrites the QA results you were about to read.</p>
+      <div class="term">
+        <div class="term-bar">PowerShell</div>
+        <pre>npm run report:qa      <span class="c"># opens reports/qa/html-report</span>
+npm run report:uat</pre>
+      </div>
+      <p>The HTML report holds the failure screenshot, a video, and a trace you can step through frame by frame. For a failure you cannot reproduce, the trace is the first place to look.</p>
+
+      <div class="note stop">
+        <span class="note-t">Production guard</span>
+        <p>Any test tagged <code>@no-prod</code> is <strong>skipped automatically</strong> when the target is production, and reported as <em>blocked</em> with the reason. Read-only tests still run, so prod stays useful for smoke checks.</p>
+        <p>Overriding it is deliberate and explicit: <code>npm run test:prod:unsafe</code>. Onboarding tests create real employee records in the live HRMS — nobody cleans those up.</p>
+      </div>
+    </section>
+
+    <!-- ============ QUIRKS ============ -->
+    <section id="quirks">
+      <p class="part-label">Part five</p>
+      <h2 class="part">Four Loyaltri quirks that will bite you</h2>
+      <p class="lede">These were all found by running against the live app. They are handled in the framework already — this is so you recognise them when writing a new test rather than losing an afternoon.</p>
+
+      <h3>1 · The URL never changes</h3>
+      <p>Loyaltri is a single-page app serving <strong>both the login form and the dashboard from <code>/</code></strong>. <code>expect(page).toHaveURL(/dashboard/)</code> can never pass. Prove a session with <code>login.accountMenu</code> or <code>dashboard.topBar</code> instead.</p>
+
+      <h3>2 · Saved sessions get wiped</h3>
+      <p>The app enforces a single-tab session and <strong>deletes its own auth keys</strong> when a session is restored into a fresh browser. Playwright never persists <code>sessionStorage</code>, so every reused login looked valid and then silently signed itself out. The fix is <code>sessionStorageSeed</code> in <code>environments.js</code>, which reseeds two keys before app code runs. Leave it alone.</p>
+
+      <h3>3 · Error messages are transient</h3>
+      <p>Sign-in failures and reset confirmations are <strong>toasts that vanish after a few seconds</strong>. Assert on them immediately after the action — no slow steps in between.</p>
+
+      <h3>4 · The sidebar is invisible to Playwright</h3>
+      <p>The left module rail renders as <code>&lt;aside class="sidebar hidden lg:block close"&gt;</code> — present in the DOM but <code>display:none</code> at every width tested, up to 1920px. Never assert it is visible; anything navigating it must expand it first.</p>
+
+      <div class="note">
+        <span class="note-t">Also worth knowing</span>
+        <p>The dashboard greeting is <strong>randomised</strong> — "Hey", "Hi", "It's great to see you again". Never assert on it. And "Welcome back" belongs to the <em>login</em> page, so matching it would pass against a signed-out browser.</p>
+      </div>
+    </section>
+
+    <!-- ============ REFERENCE ============ -->
+    <section id="reference">
+      <p class="part-label">Part six</p>
+      <h2 class="part">Reference</h2>
+
+      <h3>Login case map</h3>
+      <p>All fifteen are automated and passing. The spec title matches the TestLink case name exactly.</p>
+      <div class="tw">
+        <table>
+          <thead><tr><th class="mono">TestLink</th><th class="mono">Case</th><th>Title</th><th class="mono">Tags</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">LOYTRI-37</td><td class="mono">TC01</td><td>Successful login with valid credentials</td><td class="mono">@smoke</td></tr>
+            <tr><td class="mono">LOYTRI-38</td><td class="mono">TC02</td><td>Successful login with Remember Me ticked</td><td class="mono">@smoke</td></tr>
+            <tr><td class="mono">LOYTRI-39</td><td class="mono">TC03</td><td>Login succeeds with Remember Me ticked then unticked</td><td class="mono">@regression</td></tr>
+            <tr><td class="mono">LOYTRI-40</td><td class="mono">TC04</td><td>Login fails with an invalid password</td><td class="mono">@regression</td></tr>
+            <tr><td class="mono">LOYTRI-41</td><td class="mono">TC05</td><td>Login fails for an unknown email</td><td class="mono">@regression</td></tr>
+            <tr><td class="mono">LOYTRI-42</td><td class="mono">TC06</td><td>Wrong password and unknown email give the same message</td><td class="mono">@regression</td></tr>
+            <tr><td class="mono">LOYTRI-43</td><td class="mono">TC07</td><td>Empty form shows both required-field errors</td><td class="mono">@regression</td></tr>
+            <tr><td class="mono">LOYTRI-44</td><td class="mono">TC08</td><td>Email without a password is rejected</td><td class="mono">@regression</td></tr>
+            <tr><td class="mono">LOYTRI-45</td><td class="mono">TC09</td><td>Password without an email is rejected</td><td class="mono">@regression</td></tr>
+            <tr><td class="mono">LOYTRI-46</td><td class="mono">TC10</td><td>Logout ends the session</td><td class="mono">@smoke</td></tr>
+            <tr><td class="mono">LOYTRI-47</td><td class="mono">TC11</td><td>Cancelling logout with Not Now keeps the user signed in</td><td class="mono">@regression</td></tr>
+            <tr><td class="mono">LOYTRI-48</td><td class="mono">TC12</td><td>Logout dialog offers both choices</td><td class="mono">@regression</td></tr>
+            <tr><td class="mono">LOYTRI-49</td><td class="mono">TC13</td><td>Forgot password sends a reset link</td><td class="mono">@regression</td></tr>
+            <tr><td class="mono">LOYTRI-50</td><td class="mono">TC14</td><td>Reset gives the same message for an unknown address</td><td class="mono">@regression</td></tr>
+            <tr><td class="mono">LOYTRI-51</td><td class="mono">TC15</td><td>Cancel closes the reset dialog without sending</td><td class="mono">@regression</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>First-time setup</h3>
+      <div class="term">
+        <div class="term-bar">PowerShell — once per machine</div>
+        <pre>npm install
+npm run install:browsers
+
+<span class="c"># copy .env.example to each environment you use, fill in real values</span>
+<span class="c"># .env files are gitignored — never commit them</span></pre>
+      </div>
+
+      <h3>Tag vocabulary</h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th class="mono">Tag</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">@LOYTRI-nn</td><td>TestLink case ID. Selects the test and addresses the result.</td></tr>
+            <tr><td class="mono">@smoke</td><td>Core path. Must always pass.</td></tr>
+            <tr><td class="mono">@regression</td><td>Fuller coverage, including negative cases.</td></tr>
+            <tr><td class="mono">@no-prod</td><td>Creates or changes records. Auto-skipped on production.</td></tr>
+            <tr><td class="mono">@api</td><td>API-level test, no browser.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ BLOCKED ============ -->
+    <section id="blocked">
+      <p class="part-label">Part seven</p>
+      <h2 class="part">What works, and what's blocked</h2>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>Capability</th><th class="mono">State</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Multi-environment switching</td><td class="mono"><span class="pill ok">working</span></td><td>Four instances, verified</td></tr>
+            <tr><td>Login suite automation</td><td class="mono"><span class="pill ok">working</span></td><td>15 / 15 passing against alpha</td></tr>
+            <tr><td>TestLink ID tagging</td><td class="mono"><span class="pill ok">working</span></td><td>LOYTRI-37…51 mapped</td></tr>
+            <tr><td>Case selection by assignment</td><td class="mono"><span class="pill ok">working</span></td><td>Grep generation verified</td></tr>
+            <tr><td>Result parsing</td><td class="mono"><span class="pill ok">working</span></td><td>Status, duration, error, screenshot</td></tr>
+            <tr><td>Coverage gap detection</td><td class="mono"><span class="pill ok">working</span></td><td>Assigned cases with no test are reported</td></tr>
+            <tr><td>Production guard</td><td class="mono"><span class="pill ok">working</span></td><td>Verified in both directions</td></tr>
+            <tr><td>Fetching assignments from TestLink</td><td class="mono"><span class="pill no">blocked</span></td><td>Needs the API</td></tr>
+            <tr><td>Publishing results to TestLink</td><td class="mono"><span class="pill no">blocked</span></td><td>Needs the API</td></tr>
+            <tr><td>Employee onboarding suite</td><td class="mono"><span class="pill wait">not started</span></td><td>Waiting on a codegen recording</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note stop">
+        <span class="note-t">The blocker — a server fix, not a code fix</span>
+        <p>TestLink's API cannot load. PHP fails to parse the file, so both XML-RPC and REST return errors while the web UI works normally. No API setting can work around a parse error.</p>
+      </div>
+
+      <div class="term">
+        <div class="term-bar">the error</div>
+        <pre><span class="r">Parse error: syntax error, unexpected '$this' (T_VARIABLE)
+in /var/www/html/lib/api/xmlrpc/v1/xmlrpc.class.php on line 3557</span>
+
+<span class="c"># for whoever administers the server — confirms it without a web server:</span>
+php -l /var/www/html/lib/api/xmlrpc/v1/xmlrpc.class.php</pre>
+      </div>
+
+      <p>Server is nginx 1.24 on Ubuntu, PHP 7.4.33, TestLink 1.9.20. Replacing that one file from a clean 1.9.20 archive is the likely fix — the rest of the install is healthy. Once <code>php -l</code> reports <em>No syntax errors detected</em>, the two dashed steps in Part three connect and results start flowing automatically.</p>
+
+      <h3>Until then</h3>
+      <p>Everything else works. Run your assigned cases with <code>--grep</code>, read the pass/fail from the terminal, and record the results in TestLink by hand. The only manual step is the last one.</p>
+    </section>
+
+  </main>
+
+  <footer>
+    Loyaltri QA automation · Playwright 1.48 · TestLink 1.9.20 · Environments: test · qa · uat · prod
+  </footer>
+</div>
