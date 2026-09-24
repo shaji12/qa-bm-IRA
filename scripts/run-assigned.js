@@ -17,7 +17,7 @@
  *
  * The link between TestLink and a spec is the tag in the test title:
  *
- *   test('TC01 — Successful login @LOYTRI-37', ...)
+ *   test('TC01 — Master Admin logs in with valid credentials @Canteen-52', ...)
  *
  * That tag both SELECTS the test and ADDRESSES the result. There is no mapping
  * file, because a mapping file drifts and a tag in a title cannot.
@@ -64,8 +64,8 @@ const USAGE = `
   Which server the tests run against comes from TEST_ENV, exactly as it does
   for a normal run:
 
-    npm run testlink -- --build "RC1"                   (alpha, the default)
-    cross-env TEST_ENV=staging npm run testlink -- --build "RC1"
+    npm run testlink -- --build "RC1"         (qa, the default)
+    npm run testlink:prod -- --build "RC1"
 `;
 
 function parseArgs(argv) {
@@ -418,13 +418,7 @@ async function main() {
 // Helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Absolute path to Playwright's CLI entry point.
- *
- * require.resolve('@playwright/test/cli.js') does NOT work: the package's
- * "exports" map deliberately hides that subpath. Resolving its package.json is
- * allowed, though, so locate the package directory that way and join.
- */
+
 function resolvePlaywrightCli() {
   const candidates = [];
 
@@ -433,7 +427,7 @@ function resolvePlaywrightCli() {
       path.join(path.dirname(require.resolve('@playwright/test/package.json')), 'cli.js')
     );
   } catch {
-    // Not resolvable from here — fall through to the layout-based guess.
+   
   }
   candidates.push(path.join(ROOT, 'node_modules', '@playwright', 'test', 'cli.js'));
 
@@ -451,13 +445,7 @@ function labelFor(status) {
   return { p: 'PASS   ', f: 'FAIL   ', b: 'BLOCKED' }[status] || status;
 }
 
-/**
- * The execution note left in TestLink.
- *
- * Written to be readable by someone looking at the case in TestLink weeks
- * later, with no access to the terminal output: what ran, where, how long, and
- * what broke.
- */
+
 function buildNotes(result) {
   const lines = [
     `Automated: ${result.title}`,
@@ -478,7 +466,7 @@ function buildNotes(result) {
   return lines.join('\n');
 }
 
-/** Attaches failure screenshots, without letting an upload failure lose the result. */
+
 async function attachScreenshots(client, executionId, result, problems) {
   for (const shot of result.screenshots.slice(0, 3)) {
     const abs = path.isAbsolute(shot) ? shot : path.join(ROOT, shot);
@@ -497,14 +485,11 @@ async function attachScreenshots(client, executionId, result, problems) {
 }
 
 main().catch((err) => {
-  // fail() has already printed and just wants us to stop.
   if (err instanceof CleanExit) {
     process.exitCode = 1;
     return;
   }
 
-  // A setup mistake gets its message alone; anything else is a bug and gets the
-  // stack, because whoever hits it will need it.
   const message = err.userFacing ? err.message : err.stack || err.message;
   process.stderr.write(`\n  ERROR  ${message}\n\n`);
   process.exitCode = 1;

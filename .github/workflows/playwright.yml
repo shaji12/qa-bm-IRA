@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         # One entry per project key in src/config/environments.js.
-        project: [loyaltri]
+        project: [bm_canteen]
     steps:
       - uses: actions/checkout@v4
 
@@ -34,9 +34,11 @@ jobs:
       - name: Run UI tests for ${{ matrix.project }}
         run: npx playwright test --project=${{ matrix.project }}-ui
         env:
-          LOYALTRI_URL: ${{ secrets.LOYALTRI_URL }}
-          LOYALTRI_USER: ${{ secrets.LOYALTRI_USER }}
-          LOYALTRI_PASS: ${{ secrets.LOYALTRI_PASS }}
+          TEST_ENV: qa
+          BM_CANTEEN_URL: ${{ secrets.BM_CANTEEN_URL }}
+          BM_CANTEEN_ADMIN_URL: ${{ secrets.BM_CANTEEN_ADMIN_URL }}
+          BM_CANTEEN_ADMIN_USER: ${{ secrets.BM_CANTEEN_ADMIN_USER }}
+          BM_CANTEEN_ADMIN_PASS: ${{ secrets.BM_CANTEEN_ADMIN_PASS }}
 
       - name: Upload report for ${{ matrix.project }}
         if: always()

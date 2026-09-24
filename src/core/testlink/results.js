@@ -1,5 +1,6 @@
 
-const CASE_TAG = /@([A-Z][A-Z0-9]*-\d+)\b/g;
+// Mixed case allowed: the BM Canteen project's TestLink prefix is "Canteen" (Canteen-52).
+const CASE_TAG = /@([A-Za-z][A-Za-z0-9]*-\d+)\b/g;
 
 
 const STATUS = {

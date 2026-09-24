@@ -5,7 +5,7 @@ const NO_PROD_TAG = '@no-prod';
 
 const test = base.test.extend({
   env: async ({}, use, testInfo) => {
-    // 'loyaltri-ui' and 'loyaltri-setup' both resolve to 'loyaltri'
+    
     await use(getEnv(testInfo.project.name));
   },
 

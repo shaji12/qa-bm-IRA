@@ -49,7 +49,6 @@ class TestLinkClient {
   // Connectivity
   // -------------------------------------------------------------------------
 
-  /** True when the dev key is valid. Run this before anything else. */
   async checkDevKey() {
     return this.call('checkDevKey', { devKey: this.key });
   }
