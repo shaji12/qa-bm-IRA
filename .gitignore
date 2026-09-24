@@ -7,7 +7,7 @@ playwright/.cache/
 # Saved login sessions from auth.setup.js — these are live credentials.
 .auth/
 
-# Per-instance credentials (.env.alpha / .env.staging / .env.prod).
+# Per-instance credentials (.env.qa / .env.prod).
 # The trailing exception keeps the committed template visible.
 .env
 .env.*

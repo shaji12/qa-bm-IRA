@@ -198,8 +198,7 @@ class XmlRpcFault extends Error {
 function parseResponse(xml) {
   const trimmed = String(xml).trim();
 
-  // A PHP error page is not XML at all. Say so plainly rather than failing
-  // with a confusing parse error twenty lines later.
+  
   if (!trimmed.startsWith('<?xml') && !trimmed.startsWith('<methodResponse')) {
     const preview = trimmed.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
     throw new Error(

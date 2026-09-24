@@ -1,11 +1,11 @@
 const path = require('path');
-const INSTANCES = ['alpha', 'staging', 'prod'];
-const INSTANCE = String(process.env.TEST_ENV || 'alpha').toLowerCase();
+const INSTANCES = ['qa', 'prod'];
+const INSTANCE = String(process.env.TEST_ENV || 'qa').toLowerCase();
 
 if (!INSTANCES.includes(INSTANCE)) {
   throw new Error(
     `Unknown TEST_ENV "${INSTANCE}". Use one of: ${INSTANCES.join(', ')} ` +
-      `(e.g. npm run test:staging).`
+      `(e.g. npm run test:qa).`
   );
 }
 
@@ -19,25 +19,26 @@ const ALLOW_PROD = process.env.ALLOW_PROD === 'true';
 
 
 const environments = {
-  loyaltri: {
-    displayName: 'Loyaltri',
+  bm_canteen: {
+    displayName: 'BM Canteen',
     instance: INSTANCE,
-    baseURL: process.env.LOYALTRI_URL,
-    username: process.env.LOYALTRI_USER,
-    password: process.env.LOYALTRI_PASS,
+    baseURL: process.env.BM_CANTEEN_URL,
 
-    
-    sessionStorageSeed: { sessionActive: 'true', tabSession: 'active' },
+    // Admin, parent and student each sign in on a different page, so every
+    // role carries its own login URL alongside its credentials.
+    roles: {
+      admin: {
+        url: process.env.BM_CANTEEN_ADMIN_URL,
+        username: process.env.BM_CANTEEN_ADMIN_USER,
+        password: process.env.BM_CANTEEN_ADMIN_PASS,
+      },
+      // parent: {
+      //   url: process.env.BM_CANTEEN_PARENT_URL,
+      //   username: process.env.BM_CANTEEN_PARENT_USER,
+      //   password: process.env.BM_CANTEEN_PARENT_PASS,
+      // },
+    },
   },
-
-  // Add the next external project here, e.g.:
-  // montes: {
-  //   displayName: 'Montes',
-  //   instance: INSTANCE,
-  //   baseURL: process.env.MONTES_URL,
-  //   username: process.env.MONTES_USER,
-  //   password: process.env.MONTES_PASS,
-  // },
 };
 
 
@@ -65,19 +66,34 @@ function getEnv(nameOrProject) {
   return env;
 }
 
-function requireCredentials(nameOrProject) {
+/**
+ * The login URL and credentials for one role, e.g. requireCredentials('bm_canteen', 'admin').
+ * Stops with the exact variable names to fill in when any of them is empty.
+ */
+function requireCredentials(nameOrProject, role) {
   const key = toProjectKey(nameOrProject);
   const env = getEnv(key);
-  const missing = ['baseURL', 'username', 'password'].filter((field) => !env[field]);
-  if (missing.length) {
-    const vars = { baseURL: 'URL', username: 'USER', password: 'PASS' };
+  const login = env.roles[role];
+  if (!login) {
     throw new Error(
-      `Missing ${missing.map((f) => `${key.toUpperCase()}_${vars[f]}`).join(' and ')} ` +
-        `for the "${INSTANCE}" instance. ` +
+      `No "${role}" role configured for ${key}. Known roles: ${Object.keys(env.roles).join(', ')}`
+    );
+  }
+
+  const prefix = `${key}_${role}`.toUpperCase();
+  const missing = [];
+  if (!env.baseURL) missing.push(`${key.toUpperCase()}_URL`);
+  if (!login.url) missing.push(`${prefix}_URL`);
+  if (!login.username) missing.push(`${prefix}_USER`);
+  if (!login.password) missing.push(`${prefix}_PASS`);
+
+  if (missing.length) {
+    throw new Error(
+      `Missing ${missing.join(', ')} for the "${INSTANCE}" instance. ` +
         `Copy .env.example to .env.${INSTANCE} and fill in the values.`
     );
   }
-  return env;
+  return login;
 }
 
 module.exports = {
