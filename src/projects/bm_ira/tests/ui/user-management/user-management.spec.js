@@ -29,7 +29,7 @@ test.describe('User Management', () => {
     const users = await openUserManagement(page);
 
     const headerTexts = (await users.headers.allInnerTexts()).map((header) => header.trim());
-    expect(headerTexts).toEqual(expect.arrayContaining(userTableHeadersExpected));
+    expect(headerTexts).toEqual(userTableHeadersExpected);
     await expect(users.rows.first()).toBeVisible();
     const details = await users.firstUserDetails();
     for (const value of Object.values(details)) {
@@ -49,16 +49,18 @@ test.describe('User Management', () => {
 
   test('UM04 — User records can be sorted', { tag: ['@functional'] }, async ({ page }) => {
     const users = await openUserManagement(page);
-    const nameHeader = users.headers.filter({ hasText: /name|user/i }).first();
-
-    await nameHeader.click();
-    const firstOrder = await users.rows.allInnerTexts();
-    await nameHeader.click();
-    await expect.poll(async () => users.rows.allInnerTexts()).not.toEqual(firstOrder);
-    const secondOrder = await users.rows.allInnerTexts();
-
-    expect(firstOrder.length).toBeGreaterThan(1);
-    expect(secondOrder).not.toEqual(firstOrder);
+    await users.sortButton.click();
+    await users.page.getByRole('button', { name: '↑', exact: true }).first().click();
+    await users.sortButton.click();
+    const names = await Promise.all(
+      (await users.rows.all()).map((row) => users.getCellValue(row, /name/i))
+    );
+    expect(names.length).toBeGreaterThan(1);
+    expect(names).toEqual([...names].sort((left, right) => left.localeCompare(right)));
+    const clearButton = users.page.getByRole('button', { name: 'Clear', exact: true });
+    if (await clearButton.isVisible()) {
+      await clearButton.click();
+    }
   });
 
   test('UM05 — Users can be filtered by institution', { tag: ['@functional'] }, async ({ page }) => {
@@ -68,7 +70,10 @@ test.describe('User Management', () => {
     await users.selectFilter('Institution', details.institution);
     expect(await users.rows.count()).toBeGreaterThan(0);
     for (const row of await users.rows.all()) {
-      await expect(row).toContainText(details.institution);
+      const institution = await users.getCellValue(row, /institution/i);
+      expect(institution.trim().toLocaleLowerCase().replace(/s$/, '')).toBe(
+        details.institution.trim().toLocaleLowerCase().replace(/s$/, '')
+      );
     }
   });
 
@@ -87,13 +92,18 @@ test.describe('User Management', () => {
     const users = await openUserManagement(page);
     await users.selectFilter('Status', 'Active');
     expect(await users.rows.count()).toBeGreaterThan(0);
+    await expect(users.rows.first().locator('[role="switch"]')).toHaveAttribute('aria-checked', 'true');
     for (const row of await users.rows.all()) {
-      await expect(row).toContainText(/active/i);
+      await expect(row.locator('[role="switch"]')).toHaveAttribute('aria-checked', 'true');
     }
+
+    await users.filterButton.click();
+    await users.filterMenu.getByRole('button', { name: 'Clear All Filters', exact: true }).click();
     await users.selectFilter('Status', 'Inactive');
     expect(await users.rows.count()).toBeGreaterThan(0);
+    await expect(users.rows.first().locator('[role="switch"]')).toHaveAttribute('aria-checked', 'false');
     for (const row of await users.rows.all()) {
-      await expect(row).toContainText(/inactive/i);
+      await expect(row.locator('[role="switch"]')).toHaveAttribute('aria-checked', 'false');
     }
   });
 
@@ -123,9 +133,10 @@ test.describe('User Management', () => {
     await users.openAddUserForm();
     await users.fillUserForm(user);
     await users.submitUserForm();
+    await users.search(user.email);
     const row = users.rows.filter({ hasText: user.email });
     await expect(row).toBeVisible();
-    await row.getByRole('button', { name: /delete/i }).click();
+    await users.deleteUser(row);
     await users.confirmAction();
     await expect(row).toHaveCount(0);
   });
@@ -148,7 +159,7 @@ test.describe('User Management', () => {
     const firstRow = users.rows.first();
     const email = await users.getCellValue(firstRow, /email/i);
 
-    await firstRow.getByRole('button', { name: /edit/i }).click();
+    await users.editUser(firstRow);
     await expect(users.form).toBeVisible();
     await expect(users.form.getByRole('textbox', { name: /email/i }).first()).toHaveValue(
       email
@@ -161,16 +172,17 @@ test.describe('User Management', () => {
     await users.openAddUserForm();
     await users.fillUserForm(user);
     await users.submitUserForm();
+    await users.search(user.email);
 
     const row = users.rows.filter({ hasText: user.email });
     await expect(row).toBeVisible();
     const updatedName = `${user.name} Updated`;
-    await row.getByRole('button', { name: /edit/i }).click();
+    await users.editUser(row);
     await users.fill(users.form.getByRole('textbox', { name: /name/i }).first(), updatedName);
     await users.submitUserForm();
     const updatedRow = users.rows.filter({ hasText: user.email });
     await expect(updatedRow).toContainText(updatedName);
-    await updatedRow.getByRole('button', { name: /delete/i }).click();
+    await users.deleteUser(updatedRow);
     await users.confirmAction();
     await expect(updatedRow).toHaveCount(0);
   });
@@ -183,13 +195,14 @@ test.describe('User Management', () => {
     await users.fillUserForm(user);
     await users.submitUserForm();
 
+    await users.search(user.email);
     const row = users.rows.filter({ hasText: user.email });
-    await row.getByRole('button', { name: /delete/i }).click();
+    await users.deleteUser(row);
     await expect(users.confirmationDialog).toBeVisible();
     await users.confirmationDialog.getByRole('button', { name: /^cancel$/i }).click();
     await expect(row).toBeVisible();
 
-    await row.getByRole('button', { name: /delete/i }).click();
+    await users.deleteUser(row);
     await users.confirmAction();
     await expect(row).toHaveCount(0);
   });
@@ -201,21 +214,16 @@ test.describe('User Management', () => {
     await users.fillUserForm(user);
     await users.submitUserForm();
 
+    await users.search(user.email);
     const row = users.rows.filter({ hasText: user.email });
     await expect(row).toBeVisible();
-    const initialStatus = await users.getCellValue(row, /status/i);
-    if (/^active$/i.test(initialStatus)) {
-      await row.getByRole('button', { name: /deactivate/i }).click();
-      await expect(row).toContainText(/inactive/i);
-      await row.getByRole('button', { name: /activate/i }).click();
-      await expect(row).toContainText(/active/i);
-    } else {
-      await row.getByRole('button', { name: /activate/i }).click();
-      await expect(row).toContainText(/active/i);
-      await row.getByRole('button', { name: /deactivate/i }).click();
-      await expect(row).toContainText(/inactive/i);
-    }
-    await row.getByRole('button', { name: /delete/i }).click();
+    const statusToggle = (await users.getCell(row, /status/i)).locator('[role="switch"]');
+    await expect(statusToggle).toHaveAttribute('aria-checked', 'true');
+    await statusToggle.click();
+    await expect(statusToggle).toHaveAttribute('aria-checked', 'false');
+    await statusToggle.click();
+    await expect(statusToggle).toHaveAttribute('aria-checked', 'true');
+    await users.deleteUser(row);
     await users.confirmAction();
     await expect(row).toHaveCount(0);
   });
