@@ -1,5 +1,5 @@
 
-// Mixed case allowed: the BM Canteen project's TestLink prefix is "Canteen" (Canteen-52).
+// Mixed case allowed: this project's TestLink case prefix is "Store" (Store-52).
 const CASE_TAG = /@([A-Za-z][A-Za-z0-9]*-\d+)\b/g;
 
 

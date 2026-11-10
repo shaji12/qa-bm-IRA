@@ -1,6 +1,6 @@
-# BM Canteen Automation
+# BM IRA Automation
 
-Playwright (JavaScript) automation for **BM Canteen** (Snack Lab). The app has a
+Playwright (JavaScript) automation for **BM IRA** (Snack Lab). The app has a
 separate login for each kind of user — Master Admin, parent, student — and each
 one is tested as its own **role**. Master Admin is automated today; parent and
 student are next.
@@ -59,10 +59,10 @@ so the same spec runs against QA or production unchanged.
 
    | Project | Purpose |
    |---|---|
-   | `bm_canteen-setup` | Logs in as Master Admin **once** and saves the session |
-   | `bm_canteen-ui` | All browser tests, reusing that session |
+   | `bm_ira-setup` | Logs in as Master Admin **once** and saves the session |
+   | `bm_ira-ui` | All browser tests, reusing that session |
 
-4. **Setup runs first**, because `bm_canteen-ui` depends on it. If setup cannot
+4. **Setup runs first**, because `bm_ira-ui` depends on it. If setup cannot
    log in, the UI tests do not run — scroll up for the setup error.
 5. **Results are written per instance** to `reports/<instance>/` — the HTML
    report, `results.json` (read by TestLink publishing) and JUnit XML.
@@ -79,7 +79,7 @@ Every run prints its target first:
 
 | Command | Reads | What it is |
 |---|---|---|
-| `npm run test:qa` | `.env.qa` | `canteen-demo.globtech.in`. **The default.** |
+| `npm run test:qa` | `.env.qa` | `store-qa.globtech.in`. **The default.** |
 | `npm run test:prod` | `.env.prod` | Production — read-only tests only |
 
 Any test tagged `@no-prod` writes real records, so it **skips automatically** on
@@ -105,7 +105,7 @@ Anything after `--` goes to Playwright:
 ```powershell
 npm run test:qa -- admin-login.spec.js       # one file
 npm run test:qa -- -g "TC04"                 # one test
-npm run test:qa -- -g "@Canteen-52"          # by TestLink ID
+npm run test:qa -- -g "@Store-52"             # by TestLink ID
 npm run test:qa -- --headed                  # watch it run
 npm run test:qa -- --ui                      # interactive mode
 npm run list                                 # what WOULD run
@@ -120,7 +120,7 @@ npm run codegen                              # record clicks as code
 const { test, expect } = require('../../../../../core/fixtures/test-fixtures');
 const { AdminLoginPage } = require('../../../pages/common/AdminLoginPage');
 
-test('TC01 — Master Admin logs in with valid credentials @Canteen-52',
+test('TC01 — Master Admin logs in with valid credentials @Store-52',
      { tag: ['@sanity'] }, async ({ page, env }) => {
   const admin = env.roles.admin;
   const login = new AdminLoginPage(page, admin.url);
@@ -136,7 +136,7 @@ test('TC01 — Master Admin logs in with valid credentials @Canteen-52',
 |---|---|
 | `require(... test-fixtures)` | **Not** `@playwright/test`. This is what gives you `env`. |
 | `{ tag: ['@sanity'] }` | The tier. Omit it for regression-only tests. |
-| `@Canteen-52` in the title | The TestLink case ID — see [below](#how-testlink-connects) |
+| `@Store-52` in the title | The TestLink case ID — see [below](#how-testlink-connects) |
 | `env.roles.admin` | The role's login URL and credentials for the current instance |
 | `new AdminLoginPage(page, admin.url)` | Locators live in Page Objects, never in specs |
 | `test.step(...)` | A failure says *which* step broke |
@@ -149,7 +149,7 @@ Prefer `getByRole` / `getByLabel` over CSS or XPath.
 from the admin login: the eye icon was recorded as
 `getByRole('button').filter({ hasText: /^$/ })`, which also matches a toast's
 close button; and `name: 'Close'` also matches "Close toast". Both are fixed in
-[AdminLoginPage.js](src/projects/bm_canteen/pages/common/AdminLoginPage.js).
+[AdminLoginPage.js](src/projects/bm_ira/pages/common/AdminLoginPage.js).
 
 ---
 
@@ -184,7 +184,7 @@ test.use({ storageState: { cookies: [], origins: [] } });
 │   │   ├── constants/paths.js    .auth file naming
 │   │   ├── fixtures/test-fixtures.js   the `env` fixture + production guard
 │   │   └── testlink/             TestLink XML-RPC client and result mapping
-│   └── projects/bm_canteen/
+│   └── projects/bm_ira/
 │       ├── auth.setup.js         logs in as Master Admin once per run
 │       ├── data/
 │       │   └── users.js          login test data and expected messages
@@ -218,7 +218,7 @@ Parent and student each sign in on their own page. To add one (parent shown):
 
 1. Uncomment `parent` under `roles` in
    [`environments.js`](src/config/environments.js)
-2. Add `BM_CANTEEN_PARENT_URL` / `_USER` / `_PASS` to `.env.qa`, `.env.prod`
+2. Add `BM_IRA_PARENT_URL` / `_USER` / `_PASS` to `.env.qa`, `.env.prod`
    and `.env.example`
 3. Add `ParentLoginPage.js` to `pages/common/`, its data to `data/users.js`,
    and `tests/ui/login/parent-login.spec.js`
@@ -231,17 +231,17 @@ Parent and student each sign in on their own page. To add one (parent shown):
 The TestLink case ID goes in the test title as a tag:
 
 ```js
-test('TC01 — Master Admin logs in with valid credentials @Canteen-52', ...)
+test('TC01 — Master Admin logs in with valid credentials @Store-52', ...)
 ```
 
-It both **selects** the test (`-g "@Canteen-52"`) and **addresses** the result.
-There is no mapping file. The project's prefix is `Canteen` — the tag must match TestLink's case exactly.
+It both **selects** the test (`-g "@Store-52"`) and **addresses** the result.
+There is no mapping file. The project's prefix is `Store` — the tag must match TestLink's case exactly.
 
 ### Writing a new automated case
 
 1. Write the case in TestLink first
-2. Note the ID TestLink assigns (`Canteen-63`) — never invent it
-3. Put it in the spec title as `@Canteen-63`
+2. Note the ID TestLink assigns (`Store-63`) — never invent it
+3. Put it in the spec title as `@Store-63`
 4. `npm run list` to confirm it's discovered
 
 ### Running your assigned cases
@@ -269,10 +269,10 @@ execution with the key's owner.
 
 | Item | State |
 |---|---|
-| Master Admin login suite | 11 tests (TC01–TC11), tagged `@Canteen-52` … `@Canteen-62` |
-| Parent and student login | Not automated. TestLink cases `Canteen-5`, `-8`, `-10` exist |
+| Master Admin login suite | 11 tests (TC01–TC11), tagged `@Store-52` … `@Store-62` |
+| Parent and student login | Not automated. Cases are tracked in TestLink |
 | Session reuse | ⚠️ **Does not carry over yet.** BM keeps its login token in `sessionStorage` (`accessToken`, `user`), which Playwright's `storageState` does not save. Every current test logs in itself, so nothing is affected today; the first dashboard test will need this solved |
-| CI | Needs the `BM_CANTEEN_*` secrets added in GitHub → Settings → Secrets and variables → Actions |
+| CI | Needs the `BM_IRA_*` secrets added in GitHub → Settings → Secrets and variables → Actions |
 | API testing | Not built |
 
 ---
@@ -295,7 +295,7 @@ cmd.exe reads the `|` as a pipe and tears the grep apart.
 
 **`Unknown TEST_ENV "alpha"`** — only `qa` and `prod` exist.
 
-**`Missing BM_CANTEEN_ADMIN_PASS for the "qa" instance`** — that `.env` file is
+**`Missing BM_IRA_ADMIN_PASS for the "qa" instance`** — that `.env` file is
 missing the variable. The message names every missing variable and the file.
 
 **Every UI test is skipped or fails at once** — `auth.setup.js` could not log

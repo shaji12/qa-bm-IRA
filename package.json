@@ -1,7 +1,7 @@
 {
   "name": "qa-automation",
   "version": "1.0.0",
-  "description": "Playwright automation for BM Canteen",
+  "description": "Playwright automation for BM IRA",
   "private": true,
   "type": "commonjs",
   "scripts": {
@@ -22,7 +22,7 @@
     "install:browsers": "playwright install --with-deps"
   },
   "devDependencies": {
-    "@playwright/test": "^1.48.0",
+    "@playwright/test": "^1.51.1",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.5"
   }

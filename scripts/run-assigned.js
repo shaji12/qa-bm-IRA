@@ -17,7 +17,7 @@
  *
  * The link between TestLink and a spec is the tag in the test title:
  *
- *   test('TC01 — Master Admin logs in with valid credentials @Canteen-52', ...)
+ *   test('TC01 — Master Admin logs in with valid credentials @Store-52', ...)
  *
  * That tag both SELECTS the test and ADDRESSES the result. There is no mapping
  * file, because a mapping file drifts and a tag in a title cannot.

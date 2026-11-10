@@ -10,7 +10,13 @@ function buildProjects(key) {
   const storageState = authFile(key);
 
 
-  const desktop = { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 } };
+  const desktop = {
+    ...devices['Desktop Chrome'],
+    headless: false,
+    viewport: null,
+    deviceScaleFactor: undefined,
+    launchOptions: { args: ['--start-maximized'] },
+  };
 
   return [
     {

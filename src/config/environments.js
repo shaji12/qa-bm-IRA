@@ -19,23 +19,23 @@ const ALLOW_PROD = process.env.ALLOW_PROD === 'true';
 
 
 const environments = {
-  bm_canteen: {
-    displayName: 'BM Canteen',
+  bm_ira: {
+    displayName: 'BM IRA',
     instance: INSTANCE,
-    baseURL: process.env.BM_CANTEEN_URL,
+    baseURL: process.env.BM_IRA_URL,
 
     // Admin, parent and student each sign in on a different page, so every
     // role carries its own login URL alongside its credentials.
     roles: {
       admin: {
-        url: process.env.BM_CANTEEN_ADMIN_URL,
-        username: process.env.BM_CANTEEN_ADMIN_USER,
-        password: process.env.BM_CANTEEN_ADMIN_PASS,
+        url: process.env.BM_IRA_ADMIN_URL,
+        username: process.env.BM_IRA_ADMIN_USER,
+        password: process.env.BM_IRA_ADMIN_PASS,
       },
       // parent: {
-      //   url: process.env.BM_CANTEEN_PARENT_URL,
-      //   username: process.env.BM_CANTEEN_PARENT_USER,
-      //   password: process.env.BM_CANTEEN_PARENT_PASS,
+      //   url: process.env.BM_IRA_PARENT_URL,
+      //   username: process.env.BM_IRA_PARENT_USER,
+      //   password: process.env.BM_IRA_PARENT_PASS,
       // },
     },
   },
@@ -67,7 +67,7 @@ function getEnv(nameOrProject) {
 }
 
 /**
- * The login URL and credentials for one role, e.g. requireCredentials('bm_canteen', 'admin').
+ * The login URL and credentials for one role, e.g. requireCredentials('bm_ira', 'admin').
  * Stops with the exact variable names to fill in when any of them is empty.
  */
 function requireCredentials(nameOrProject, role) {
