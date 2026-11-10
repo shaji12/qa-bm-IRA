@@ -1,21 +1,23 @@
 const { randomUUID } = require('crypto');
 
-const userTableHeadersExpected = ['Name', 'Email', 'Institution', 'User Role', 'Status'];
+const userTableHeadersExpected = ['S.No', 'Name', 'Email', 'Institution', 'User Role', 'Status', 'Action'];
 
 function createUser() {
   return {
-    name: 'QA User',
-    email: `qa.user.${randomUUID()}@example.com`,
-    institution: 'NIMS Corp',
-    role: 'User',
+    name: 'Qa User',
+    email: `qa.user.${randomUUID().replace(/-/g, '')}@gmail.com`,
+    password: 'Qa@12345',
+    institution: 'Abc School',
+    role: 'Admin Manager',
   };
 }
 
 const userManagementData = {
   duplicateUser: {
     name: 'Duplicate QA User',
-    institution: 'NIMS Corp',
-    role: 'User',
+    password: 'Qa@12345',
+    institution: 'Abc School',
+    role: 'Admin Manager',
   },
 };
 
